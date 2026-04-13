@@ -6,21 +6,32 @@
   <title>SP500 Quant Studio</title>
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
   <style>
-    :root{--bg:#f6f8fc;--panel:#ffffff;--panel2:#fbfcff;--border:#e4e8f0;--text:#162033;--muted:#667085;--green:#12b76a;--green2:#ecfdf3;--red:#f04438;--red2:#fef3f2;--blue:#2e90fa;--blue2:#eff8ff;--shadow:0 10px 30px rgba(16,24,40,.08)}
-    *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#f8fbff,#f4f7fb);color:var(--text);font-family:Inter,Arial,sans-serif}
+    :root{
+      --bg:#f6f8fc;--panel:#ffffff;--panel2:#fbfcff;--border:#e4e8f0;--text:#162033;--muted:#667085;--green:#12b76a;--red:#f04438;--blue:#2e90fa;--shadow:0 10px 30px rgba(16,24,40,.08);
+      --chip:#eff8ff;--chipText:#175cd3;--grid:#eef2f6;--header:#ffffff;--input:#ffffff;
+    }
+    body.dark{
+      --bg:#0b1220;--panel:#111827;--panel2:#0f172a;--border:#243247;--text:#e5e7eb;--muted:#94a3b8;--green:#22c55e;--red:#f87171;--blue:#60a5fa;--shadow:0 10px 30px rgba(0,0,0,.28);
+      --chip:#0f2437;--chipText:#7dd3fc;--grid:#233147;--header:#111827;--input:#0f172a;
+    }
+    *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg));color:var(--text);font-family:Inter,Arial,sans-serif;transition:background .2s,color .2s}
     .wrap{max-width:1700px;margin:0 auto;padding:20px}
-    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;background:rgba(255,255,255,.88);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);margin-bottom:16px}
-    .brand{font-size:18px;font-weight:900;color:#0f172a;letter-spacing:.2px}
-    .topbar .hint{color:var(--muted);font-size:13px}
-    .hero{padding:26px 22px;margin-bottom:16px;background:linear-gradient(135deg,#ffffff 0%, #f0fbff 55%, #eefcf6 100%);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow)}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);margin-bottom:16px}
+    body.dark .topbar{background:rgba(17,24,39,.75)}
+    .brand{font-size:18px;font-weight:900;color:var(--text);letter-spacing:.2px}
+    .topbar .hint{color:var(--muted);font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .switch{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:8px 10px}
+    .switch label{font-size:13px;color:var(--muted);font-weight:700}
+    .switch select{border:none;background:transparent;color:var(--text);font-weight:800;outline:none}
+    .hero{padding:26px 22px;margin-bottom:16px;background:linear-gradient(135deg,var(--panel) 0%, color-mix(in srgb, var(--blue) 8%, var(--panel)) 45%, color-mix(in srgb, var(--green) 8%, var(--panel)) 100%);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow)}
     .hero-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:center}
     .hero-main{padding:8px 4px}
     .hero .t{color:var(--muted);letter-spacing:2px;font-size:12px;text-transform:uppercase}
-    .hero .v{font-size:56px;font-weight:900;color:#0f172a;margin:8px 0 4px}
-    .hero .s{color:#475467;font-size:18px}
-    .hero-box{background:#fff;border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+    .hero .v{font-size:56px;font-weight:900;color:var(--text);margin:8px 0 4px}
+    .hero .s{color:var(--muted);font-size:18px}
+    .hero-box{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.03)}
     .hero-box .label{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:800}
-    .hero-box .amount{font-size:44px;font-weight:900;margin-top:8px;color:#0f172a}
+    .hero-box .amount{font-size:44px;font-weight:900;margin-top:8px;color:var(--text)}
     .hero-box .delta{margin-top:8px;font-size:16px;font-weight:700;color:var(--green)}
     .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
     .kpi{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:16px 14px;box-shadow:var(--shadow);min-height:98px}
@@ -29,23 +40,23 @@
     .ok{color:var(--green)} .bad{color:var(--red)}
     .row{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-bottom:16px}
     .panel{background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:16px}
-    .panel h3{margin:0 0 10px;font-size:14px;letter-spacing:.6px;color:#344054;font-weight:800}
+    .panel h3{margin:0 0 10px;font-size:14px;letter-spacing:.6px;color:var(--text);font-weight:800}
     .chart{width:100%;height:360px}
     .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
     .ctrl{background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:10px}
-    .ctrl label{display:block;font-size:12px;color:#667085;margin-bottom:7px;font-weight:700}
-    .ctrl input,.ctrl select{width:100%;background:#fff;color:var(--text);border:1px solid #d0d5dd;border-radius:10px;padding:10px 12px;font-size:14px;outline:none}
+    .ctrl label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px;font-weight:700}
+    .ctrl input,.ctrl select{width:100%;background:var(--input);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;outline:none}
     .ctrl input:focus,.ctrl select:focus{border-color:#84caff;box-shadow:0 0 0 4px rgba(46,144,250,.12)}
     .btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-    button{background:#fff;border:1px solid #d0d5dd;color:#344054;padding:11px 14px;border-radius:12px;cursor:pointer;font-weight:700}
+    button{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:12px;cursor:pointer;font-weight:700;box-shadow:var(--shadow)}
     button.primary{background:linear-gradient(135deg,#2e90fa,#12b76a);border:none;color:#fff;box-shadow:0 12px 24px rgba(46,144,250,.18)}
     table{width:100%;border-collapse:collapse;font-size:13px}
-    th,td{border-bottom:1px solid #eaecf0;padding:10px 8px;text-align:right}
-    th{text-align:right;color:#667085;font-weight:800;background:#fcfcfd}
+    th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:right}
+    th{text-align:right;color:var(--muted);font-weight:800;background:var(--header)}
     td:first-child,th:first-child{text-align:left}
     .subgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
-    .note{color:#667085;font-size:12px;margin-top:8px}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eff8ff;color:#175cd3;font-size:12px;font-weight:800}
+    .note{color:var(--muted);font-size:12px;margin-top:8px}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--chip);color:var(--chipText);font-size:12px;font-weight:800}
     @media (max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}.row,.subgrid,.hero-grid{grid-template-columns:1fr}.controls{grid-template-columns:repeat(2,1fr)}}
     @media (max-width:700px){.grid{grid-template-columns:1fr}.hero .v{font-size:40px}.controls{grid-template-columns:1fr}}
   </style>
@@ -54,7 +65,10 @@
   <div class="wrap">
     <div class="topbar">
       <div class="brand">SP500 Quant Studio</div>
-      <div class="hint">S&P 500 de 2000 à aujourd'hui • Black-Scholes • Volatilité • Monte Carlo • Bougies</div>
+      <div class="hint">
+        <span>S&P 500 de 2000 à aujourd'hui • Black-Scholes • Volatilité • Monte Carlo • Bougies</span>
+        <span class="switch"><label for="theme">Thème</label><select id="theme" onchange="setTheme(this.value)"><option value="light">Clair</option><option value="dark">Sombre</option></select></span>
+      </div>
     </div>
 
     <div class="hero">
@@ -80,20 +94,11 @@
     </div>
 
     <div class="row">
-      <div class="panel">
-        <h3>Equity curve</h3>
-        <div id="equityChart" class="chart"></div>
-      </div>
-      <div class="panel">
-        <h3>Monte Carlo 1Y</h3>
-        <div id="mcChart" class="chart"></div>
-      </div>
+      <div class="panel"><h3>Equity curve</h3><div id="equityChart" class="chart"></div></div>
+      <div class="panel"><h3>Monte Carlo 1Y</h3><div id="mcChart" class="chart"></div></div>
     </div>
 
-    <div class="panel" style="margin-bottom:16px;">
-      <h3>Bougie S&P 500</h3>
-      <div id="candleChart" class="chart"></div>
-    </div>
+    <div class="panel" style="margin-bottom:16px;"><h3>Bougie S&P 500</h3><div id="candleChart" class="chart"></div></div>
 
     <div class="panel">
       <h3>Paramètres de test <span class="pill">modifiables en direct</span></h3>
@@ -107,25 +112,13 @@
         <div class="ctrl"><label>Monte Carlo paths</label><input id="mcPaths" type="number" value="5000" min="500" max="50000"></div>
         <div class="ctrl"><label>Mode</label><select id="mode"><option value="trend">Trend + vol + BS</option><option value="trendOnly">Trend only</option><option value="meanRev">Mean reversion</option></select></div>
       </div>
-      <div class="btns">
-        <button class="primary" onclick="runBacktest()">Lancer le test</button>
-        <button onclick="resetDefaults()">Réinitialiser</button>
-      </div>
-      <div class="note">Interface allégée, couleurs plus douces et ajout d'un graphique en bougie. Les montants sont en euros.</div>
+      <div class="btns"><button class="primary" onclick="runBacktest()">Lancer le test</button><button onclick="resetDefaults()">Réinitialiser</button></div>
+      <div class="note">Tu peux basculer instantanément entre interface claire et sombre.</div>
     </div>
 
     <div class="subgrid">
-      <div class="panel">
-        <h3>Signaux récents</h3>
-        <table>
-          <thead><tr><th>Date</th><th>Close</th><th>Vol</th><th>Delta</th><th>Signal</th></tr></thead>
-          <tbody id="tradeRows"></tbody>
-        </table>
-      </div>
-      <div class="panel">
-        <h3>Résumé</h3>
-        <table><tbody id="summaryTable"></tbody></table>
-      </div>
+      <div class="panel"><h3>Signaux récents</h3><table><thead><tr><th>Date</th><th>Close</th><th>Vol</th><th>Delta</th><th>Signal</th></tr></thead><tbody id="tradeRows"></tbody></table></div>
+      <div class="panel"><h3>Résumé</h3><table><tbody id="summaryTable"></tbody></table></div>
     </div>
   </div>
 
@@ -136,9 +129,6 @@ const opens = prices.map((p,i)=>i?prices[i-1]:(p*0.99));
 const highs = prices.map((p,i)=>Math.max(p, opens[i]) * 1.01);
 const lows  = prices.map((p,i)=>Math.min(p, opens[i]) * 0.99);
 const closes = prices.slice();
-
-function erf(x){const s=Math.sign(x), a=Math.abs(x); const t=1/(1+0.3275911*a); const y=1-((((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t)*Math.exp(-a*a); return s*y}
-function normCdf(x){return 0.5*(1+erf(x/Math.SQRT2))}
 function logrets(pr){let r=[null];for(let i=1;i<pr.length;i++) r.push(Math.log(pr[i]/pr[i-1])); return r}
 function mean(v){return v.reduce((a,b)=>a+b,0)/v.length}
 function stdev(v){const m=mean(v); return Math.sqrt(v.reduce((a,b)=>a+(b-m)*(b-m),0)/(v.length-1))}
@@ -146,7 +136,9 @@ function rollingStd(arr,n){let o=[];for(let i=0;i<arr.length;i++){if(i<n-1){o.pu
 function rollingMean(arr,n){let o=[];for(let i=0;i<arr.length;i++){if(i<n-1){o.push(null);continue} const slice=arr.slice(i-n+1,i+1).filter(x=>x!==null && !isNaN(x)); o.push(slice.length?mean(slice):null)} return o}
 function maxDrawdown(eq){let peak=eq[0], mdd=0; for(const x of eq){ if(x>peak) peak=x; mdd=Math.min(mdd,(x/peak)-1)} return mdd}
 function renderTable(id, rows){document.getElementById(id).innerHTML = rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}
-
+function erf(x){const s=Math.sign(x), a=Math.abs(x); const t=1/(1+0.3275911*a); const y=1-((((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t)*Math.exp(-a*a); return s*y}
+function normCdf(x){return 0.5*(1+erf(x/Math.SQRT2))}
+function setTheme(v){document.body.classList.toggle('dark', v==='dark'); runBacktest();}
 function runBacktest(){
   const cap = +document.getElementById('capital').value;
   const w = +document.getElementById('volWindow').value;
@@ -189,19 +181,16 @@ function runBacktest(){
   document.getElementById('kpiSharpe').textContent = isFinite(sharpe)?sharpe.toFixed(2):'0.00';
   document.getElementById('kpiDD').textContent = (dd*100).toFixed(1)+'%';
   document.getElementById('kpiPF').textContent = isFinite(pf)?pf.toFixed(2):'0.00';
-  Plotly.newPlot('equityChart',[
-    {x:dates,y:bh,name:'Buy & Hold',type:'scatter',mode:'lines',line:{color:'rgba(148,163,184,.75)',width:2.2}},
-    {x:dates,y:eq,name:'Strategy',type:'scatter',mode:'lines',line:{color:'#12b76a',width:3}}
-  ],{paper_bgcolor:'#fff',plot_bgcolor:'#fff',font:{color:'#344054'},margin:{l:55,r:20,t:10,b:45},legend:{orientation:'h',y:1.04,x:0.5,xanchor:'center'},xaxis:{title:'Date',gridcolor:'#eef2f6'},yaxis:{title:'Capital (€)',gridcolor:'#eef2f6',tickformat:',.0f'}},{displayModeBar:false,responsive:true});
+  Plotly.newPlot('equityChart',[{x:dates,y:bh,name:'Buy & Hold',type:'scatter',mode:'lines',line:{color:'rgba(148,163,184,.75)',width:2.2}},{x:dates,y:eq,name:'Strategy',type:'scatter',mode:'lines',line:{color:'#12b76a',width:3}}],{paper_bgcolor:getComputedStyle(document.body).getPropertyValue('--panel'),plot_bgcolor:getComputedStyle(document.body).getPropertyValue('--panel'),font:{color:getComputedStyle(document.body).getPropertyValue('--text')},margin:{l:55,r:20,t:10,b:45},legend:{orientation:'h',y:1.04,x:0.5,xanchor:'center'},xaxis:{title:'Date',gridcolor:getComputedStyle(document.body).getPropertyValue('--grid')},yaxis:{title:'Capital (€)',gridcolor:getComputedStyle(document.body).getPropertyValue('--grid'),tickformat:',.0f'}},{displayModeBar:false,responsive:true});
   const hist=[]; for(let i=1;i<stratR.length;i++) if(pos[i]===1) hist.push(stratR[i]); const sample=hist.length?hist:lr.slice(1); const finals=[]; for(let p=0;p<Math.min(mcPaths,8000);p++){ let v=1; for(let t=0;t<12;t++) v*=Math.exp(sample[Math.floor(Math.random()*sample.length)]||0); finals.push(v*cap); }
-  Plotly.newPlot('mcChart',[{x:finals,type:'histogram',nbinsx:50,marker:{color:'#2e90fa',opacity:.85}}],{paper_bgcolor:'#fff',plot_bgcolor:'#fff',font:{color:'#344054'},margin:{l:55,r:20,t:10,b:45},xaxis:{title:'1Y capital (€)',gridcolor:'#eef2f6'},yaxis:{title:'Count',gridcolor:'#eef2f6'}},{displayModeBar:false,responsive:true});
-  Plotly.newPlot('candleChart',[{x:dates.slice(-80),open:opens.slice(-80),high:highs.slice(-80),low:lows.slice(-80),close:closes.slice(-80),type:'candlestick',increasing:{line:{color:'#12b76a'},fillcolor:'#12b76a'},decreasing:{line:{color:'#f04438'},fillcolor:'#f04438'}}],{paper_bgcolor:'#fff',plot_bgcolor:'#fff',font:{color:'#344054'},margin:{l:55,r:20,t:10,b:45},xaxis:{title:'Date',gridcolor:'#eef2f6'},yaxis:{title:'SP500',gridcolor:'#eef2f6'}},{displayModeBar:false,responsive:true});
+  Plotly.newPlot('mcChart',[{x:finals,type:'histogram',nbinsx:50,marker:{color:'#2e90fa',opacity:.85}}],{paper_bgcolor:getComputedStyle(document.body).getPropertyValue('--panel'),plot_bgcolor:getComputedStyle(document.body).getPropertyValue('--panel'),font:{color:getComputedStyle(document.body).getPropertyValue('--text')},margin:{l:55,r:20,t:10,b:45},xaxis:{title:'1Y capital (€)',gridcolor:getComputedStyle(document.body).getPropertyValue('--grid')},yaxis:{title:'Count',gridcolor:getComputedStyle(document.body).getPropertyValue('--grid')}},{displayModeBar:false,responsive:true});
+  Plotly.newPlot('candleChart',[{x:dates.slice(-80),open:opens.slice(-80),high:highs.slice(-80),low:lows.slice(-80),close:closes.slice(-80),type:'candlestick',increasing:{line:{color:'#12b76a'},fillcolor:'#12b76a'},decreasing:{line:{color:'#f04438'},fillcolor:'#f04438'}}],{paper_bgcolor:getComputedStyle(document.body).getPropertyValue('--panel'),plot_bgcolor:getComputedStyle(document.body).getPropertyValue('--panel'),font:{color:getComputedStyle(document.body).getPropertyValue('--text')},margin:{l:55,r:20,t:10,b:45},xaxis:{title:'Date',gridcolor:getComputedStyle(document.body).getPropertyValue('--grid')},yaxis:{title:'SP500',gridcolor:getComputedStyle(document.body).getPropertyValue('--grid')}},{displayModeBar:false,responsive:true});
   renderTable('summaryTable',[['Années',years.toFixed(1)],['Win rate',(win*100).toFixed(1)+'%'],['Buy & hold CAGR',(bhCagr*100).toFixed(2)+'%'],['Delta BS final',(delta[delta.length-1]||0).toFixed(2)]].map(r=>[`<strong>${r[0]}</strong>`,r[1]]));
   const rows=[]; for(let i=dates.length-1;i>=0 && rows.length<12;i--){ rows.push([dates[i], closes[i].toFixed(2), vol[i]!==null?vol[i].toFixed(2):'-', delta[i]!==null?delta[i].toFixed(2):'-', signal[i] ? '<span class="ok">LONG</span>' : '—']); }
   renderTable('tradeRows', rows);
 }
 function resetDefaults(){document.getElementById('capital').value=100000;document.getElementById('volWindow').value=12;document.getElementById('volZ').value=0;document.getElementById('deltaTh').value=0.55;document.getElementById('bsM').value=1;document.getElementById('rf').value=0.02;document.getElementById('mcPaths').value=5000;document.getElementById('mode').value='trend';runBacktest();}
-window.addEventListener('load', runBacktest);
+window.addEventListener('load', ()=>{document.getElementById('theme').value='light';runBacktest();});
 </script>
 </body>
 </html>
